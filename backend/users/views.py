@@ -39,6 +39,7 @@ class LoginAPI(generics.GenericAPIView):
 
 
 	def get(self, request, *args, **kwargs):
+		
 		if request.COOKIES.get("access"):
 			token = request.COOKIES.get("access")
 			try:
@@ -53,6 +54,7 @@ class LoginAPI(generics.GenericAPIView):
 				"email":request.user.email
 			}
 			return HttpResponse(json.dumps({"user": user}), content_type="application/json")
+
 		elif request.COOKIES.get("refresh"):
 			"""yes it hasn't got much sense use the both tokens like this :) """
 			access_token = RefreshToken(token=request.COOKIES.get("refresh"), verify=True)

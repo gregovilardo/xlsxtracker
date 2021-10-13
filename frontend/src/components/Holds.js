@@ -20,7 +20,6 @@ function Holds() {
                     console.log(data);
                     try {
                         data.forEach((hold) => {
-                            hold.pair = hold.pair.substring(0, hold.pair.length-4)
                             var avg = 1 / hold.price;
                             if (avg < 0.1) {
                                 var regex = /0+/g;
@@ -82,50 +81,72 @@ function Holds() {
                                 </th>
                             </tr>
 
-                            {holds.map((hold) => {
-                                return (
-                                    <tr key={hold.id}>
-                                        <td align="center" className="pair">
-                                            <img
-                                                width="30px"
-                                                height="30px"
-                                                src={hold.logo}
-                                                alt="coin logo"
-                                            />
-                                            {hold.pair}
-                                        </td>
-                                        <td align="center" className="date">
-                                            {hold.start_date}
-                                        </td>
-                                        <td align="right" className="holding">
-                                            {hold.holding.toFixed(hold.round)}
-                                        </td>
-                                        <td
-                                            align="right"
-                                            className="price-hold"
-                                        >
-                                            ${parseFloat(hold.price).toFixed(2)}
-                                        </td>
-                                        <td
-                                            align="right"
-                                            className={hold.color}
-                                        >
-                                            $
-                                            {(
-                                                hold.holding * hold.price
-                                            ).toFixed(2)}
-                                        </td>
+                            {holds
+                                .slice(0)
+                                .reverse()
+                                .map((hold) => {
+                                    if (hold.holding > 0) {
+                                        return (
+                                            <tr key={hold.id}>
+                                                <td
+                                                    align="center"
+                                                    className="pair"
+                                                >
+                                                    <img
+                                                        width="30px"
+                                                        height="30px"
+                                                        src={hold.logo}
+                                                        alt="coin logo"
+                                                    />
+                                                    {hold.coin}
+                                                </td>
+                                                <td
+                                                    align="center"
+                                                    className="date"
+                                                >
+                                                    {hold.start_date}
+                                                </td>
+                                                <td
+                                                    align="right"
+                                                    className="holding"
+                                                >
+                                                    {hold.holding.toFixed(
+                                                        hold.round
+                                                    )}
+                                                </td>
+                                                <td
+                                                    align="right"
+                                                    className="price-hold"
+                                                >
+                                                    $
+                                                    {parseFloat(
+                                                        hold.price
+                                                    ).toFixed(2)}
+                                                </td>
+                                                <td
+                                                    align="right"
+                                                    className="total"
+                                                >
+                                                    $
+                                                    {(
+                                                        hold.holding *
+                                                        hold.price
+                                                    ).toFixed(2)}
+                                                </td>
 
-                                        <td
-                                            align="right"
-                                            id="prctg-hold"
-                                            className={hold.color}
-                                        >
-                                            {hold.percentage}%
-                                        </td>
-                                    </tr>
-                                );
-                            })}
+                                                <td
+                                                    align="right"
+                                                    id="prctg-hold"
+                                                    className={hold.color}
+                                                >
+                                                    {hold.percentage}%
+                                                </td>
+                                            </tr>
+                                        );
+                                    } else {
+                                        return false;
+                                    }
+                                })}
                         </table>
                     </div>
                 </div>

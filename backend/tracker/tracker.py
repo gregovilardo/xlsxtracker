@@ -1,5 +1,6 @@
 from openpyxl import load_workbook
 from openpyxl.workbook import workbook
+import json
 
 def track_coins(filename):
 
@@ -21,7 +22,7 @@ def track_coins(filename):
         if value[2] == "SELL":
             trade = {
                 "date": value[0],
-                "pair": value[1],
+                "coin": value[1][:len(value[1])-4],
                 "type": value[2],
                 "price": float(value[3]),
                 "ammount": float(value[4]),
@@ -31,7 +32,7 @@ def track_coins(filename):
         else:
             trade = {
                 "date": value[0],
-                "pair": value[1],
+                "coin": value[1][:len(value[1])-4],
                 "type": value[2],
                 "price": float(value[3]),
                 "ammount": float(value[4]) - float(value[6]),
@@ -43,17 +44,18 @@ def track_coins(filename):
         counter -= 1
 
 
+
     profit_loss = []
-    list_to_fullfill = []
 
     for i in range(len(trades)):
+        list_to_fullfill = []
         if trades[i]["type"] == "SELL" or trades[i]["trade_fullfill"] == True:
             continue
         total_ammount = trades[i]["ammount"]
         total_buy = trades[i]["total"]
         total_sell = 0
         for j in range(i + 1, len(trades)):
-            if trades[i]["pair"] == trades[j]["pair"]:
+            if trades[i]["coin"] == trades[j]["coin"]:
                 if trades[j]["type"] == "SELL":
                     total_ammount -= trades[j]["ammount"]
                     total_sell += trades[j]["total"]
@@ -71,7 +73,7 @@ def track_coins(filename):
                     list_to_fullfill = []
                     total_total = total_sell - total_buy
                     finish_trade = {
-                        "pair": trades[i]["pair"],
+                        "coin": trades[i]["coin"],
                         "start": trades[j]["date"],
                         "end": trades[j]["date"],
                         "profit_loss": total_total,
@@ -83,25 +85,32 @@ def track_coins(filename):
     holds = {}
     ctr = -1
     trades_on_hold = []
+    coins_check = []
 
     for i in range(len(trades)):
         if trades[i]["trade_fullfill"] == False:
+
             if trades[i]["type"] == "BUY":
-                ctr += 1
-                hold = {
-                    "pair": trades[i]["pair"],
-                    "start_date": trades[i]["date"],
-                    "holding": trades[i]["ammount"],
-                    "start_price": trades[i]["price"],
-                    "start_total": trades[i]["total"],
-                }
-                holds[ctr] = hold
-                for j in range(i + 1, len(trades)):
-                    if trades[i]["pair"] == trades[j]["pair"]:
-                        if trades[j]["type"] == "BUY":
-                            holds[ctr]["holding"] += trades[j]["ammount"]
-                        else:
-                            holds[ctr]["holding"] -= trades[j]["ammount"]
+                if trades[i]["coin"] not in coins_check:
+                    ctr += 1
+                    hold = {
+                        "coin": trades[i]["coin"],
+                        "start_date": trades[i]["date"],
+                        "holding": trades[i]["ammount"],
+                        "start_price": trades[i]["price"],
+                        "price_avg": trades[i]["price"],
+                        "start_total": trades[i]["total"],
+                    }
+                    holds[ctr] = hold
+                    for j in range(i + 1, len(trades)):
+                        if trades[i]["coin"] == trades[j]["coin"]:
+                            if trades[j]["type"] == "BUY":
+                                holds[ctr]["holding"] += trades[j]["ammount"]
+                                holds[ctr]["price_avg"] = (holds[ctr]["price_avg"] + trades[j]["price"]) / 2
+                            else:
+                                holds[ctr]["holding"] -= trades[j]["ammount"]
+
+                    coins_check.append(trades[i]["coin"])   
 
             else:
                 trades_on_hold.append(trades[i])
@@ -109,14 +118,15 @@ def track_coins(filename):
 
     for trade in trades_on_hold:
         for i in range(len(holds)):
-            if trade["pair"] == holds[i]["pair"]:
+            if trade["coin"] == holds[i]["coin"]:
                 trade["hold"] = holds[i]
-                trade["profit_loss"] = -(holds[i]["start_price"] * trade["ammount"]) + trade["total"]
+                trade["profit_loss"] = -(holds[i]["price_avg"] * trade["ammount"]) + trade["total"]
                 trade["percentage"] = (trade["price"] * 100 / holds[i]["start_price"]) -100
 
     holds_list = []
     for i in range(len(holds)):
         holds_list.append(holds[i])
-            
-    print(holds)
+
+
     return {"trades":profit_loss, "holds":holds_list, "trades_on_hold":trades_on_hold}
+

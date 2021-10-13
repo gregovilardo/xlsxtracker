@@ -11,17 +11,12 @@ function TradesOnHold() {
     const [trades_on_hold, setTradesOnHold] = useState([]);
     const { currentUser } = useCurrentUser();
 
- 
-
     useEffect(() => {
         setTradesOnHold([]);
         const fetchTradesOnHold = async () => {
             try {
-                const response = await getTracker(
-                    "trades_on_hold",
-                    url
-                );
-                response.json().then(data=>{
+                const response = await getTracker("trades_on_hold", url);
+                response.json().then((data) => {
                     console.log(data);
                     try {
                         data.forEach((trades_on_hold) => {
@@ -29,18 +24,20 @@ function TradesOnHold() {
                                 0,
                                 10
                             );
-                            trades_on_hold.profit_loss > 0 ? trades_on_hold.color = "profit" : trades_on_hold.color = "loss"
-    
+                            trades_on_hold.profit_loss > 0
+                                ? (trades_on_hold.color = "profit")
+                                : (trades_on_hold.color = "loss");
+
                             // (date.replace("T", " ").replace("Z", "")) for details of the trade
                             setTradesOnHold((prevTrade_on_hold) => [
                                 ...prevTrade_on_hold,
                                 trades_on_hold,
                             ]);
                         });
-                    } catch(e) {
+                    } catch (e) {
                         console.log(e);
                     }
-                })
+                });
             } catch (e) {
                 console.log(e);
             }
@@ -61,9 +58,7 @@ function TradesOnHold() {
                     <div className="table">
                         <table cellSpacing="0">
                             <tr>
-                                <th align="center" >
-                                    Pair
-                                </th>
+                                <th align="center">Pair</th>
                                 <th align="center" className="date">
                                     Date
                                 </th>
@@ -75,30 +70,55 @@ function TradesOnHold() {
                                 </th>
                             </tr>
 
-                            {trades_on_hold.map((trade) => {
-                                return (
-                                    <tr key={trade.id}>
-                                        <td align="center" className="pair">
-                                            <img
-                                                width="30px"
-                                                height="30px"
-                                                src={trade.logo}
-                                                alt="coin logo"
-                                            />
-                                            {trade.pair}
-                                        </td>
-                                        <td align="center" className="date">
-                                            {trade.date}
-                                        </td>
-                                        <td align="center" className={trade.color}>
-                                            ${trade.profit_loss.toFixed(2)}
-                                        </td>
-                                        <td align="center" className={trade.color}>
-                                            {trade.percentage.toFixed(2)}%
-                                        </td>
-                                    </tr>
-                                );
-                            })}
+                            {trades_on_hold
+                                .slice(0)
+                                .reverse()
+                                .map((trade) => {
+                                    if (trade.profit_loss > 0.1 || trade.profit_loss < -0.1) {
+                                        return (
+                                            <tr key={trade.id}>
+                                                <td
+                                                    align="center"
+                                                    className="pair"
+                                                >
+                                                    <img
+                                                        width="30px"
+                                                        height="30px"
+                                                        src={trade.logo}
+                                                        alt="coin logo"
+                                                    />
+                                                    {trade.coin}
+                                                </td>
+                                                <td
+                                                    align="center"
+                                                    className="date"
+                                                >
+                                                    {trade.date}
+                                                </td>
+                                                <td
+                                                    align="center"
+                                                    className={trade.color}
+                                                >
+                                                    $
+                                                    {trade.profit_loss.toFixed(
+                                                        2
+                                                    )}
+                                                </td>
+                                                <td
+                                                    align="center"
+                                                    className={trade.color}
+                                                >
+                                                    {trade.percentage.toFixed(
+                                                        2
+                                                    )}
+                                                    %
+                                                </td>
+                                            </tr>
+                                        );
+                                    } else {
+                                        return (false)
+                                    }
+                                })}
                         </table>
                     </div>
                 </div>

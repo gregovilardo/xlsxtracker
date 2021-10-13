@@ -31,6 +31,7 @@ body {
         rgba(14, 14, 14, 1) 35%,
         rgba(13, 17, 18, 1) 100%
     );
+    overflow-x: hidden;
 }
 * {
     margin: 0;
@@ -394,7 +395,7 @@ input:focus {
 
 .form-home{
     max-width: 27rem;
-    padding: 2rem 0;
+    padding: 2rem 0rem;
     display: flex;
     align-items: center;
     justify-content:space-evenly;
@@ -409,6 +410,13 @@ input:focus {
     
 }
 
+.form-home-form{
+    padding: 0 0 4rem 0;
+}
+
+.msg-home{
+    position: absolute;
+}
 
 
 .text-home{
@@ -435,6 +443,26 @@ input:focus {
     max-width: 30rem;
 }
 
+.delete-home{
+    display: flex;
+    width: max(17vw, 16rem);
+    flex-direction: column;
+    padding: 2rem 0 4rem 0;
+    gap: 1rem;
+}
+.delete-home button{
+    display: flex;
+    text-align: left;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.delete-home img{
+    width: 1rem;
+    height: 1rem;
+}
+
+
 .decoration{
     padding: 2rem 0;
 }
@@ -444,7 +472,7 @@ input:focus {
     justify-content: center;
     width: max(30vw, 15rem);
     height: max(30vw, 15rem);
-    background: linear-gradient(204.75deg, #1C7293 14.11%, #1C7293 32.82%, #337D9A 49.76%, #18A8AB 80.32%, #16A17D 98.03%);
+    background: linear-gradient(204.75deg, #1C7293 14.11%, #1C7293 32.82%, #337D9A 49.76%, #1897ab 80.32%, #1693a1 98.03%);
     border-radius: 50%;
     background-size: 500%;
     background-position: left;
@@ -455,7 +483,8 @@ input:focus {
     position: absolute;
     width: max(30vw, 15rem);
     height: max(30vw, 15rem);
-    background: linear-gradient(204.75deg, #1C7293 14.11%, #1C7293 32.82%, #337D9A 49.76%, #18A8AB 80.32%, #16A17D 98.03%);
+    background: linear-gradient(204.75deg, #1C7293 14.11%, #1C7293 32.82%, #337D9A 49.76%, #1897ab 80.32%, #1693a1 98.03%);
+    /* background: linear-gradient(204.75deg, #1C7293 14.11%, #1C7293 32.82%, #337D9A 49.76%, #18A8AB 80.32%, #16A17D 98.03%); */
     border-radius: 50%;
     background-size: 500%;
     background-position: left;
@@ -463,6 +492,8 @@ input:focus {
     filter: blur(1.8rem);
     z-index: -999;
 }
+
+
 
 @keyframes circle-animation {
     0%{

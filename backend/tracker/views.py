@@ -22,7 +22,7 @@ from requests import Request, Session
 import json
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication, JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from urllib.parse import parse_qs
 
 API = "27ac0e7365436788f328abf156a9ed054a8d8196"
 
@@ -44,7 +44,7 @@ class TradeList(APIView):
         coins = []
         # i don't add the logo in this loop because that would mean a lot of calls to the API, and i can only do once per second
         for trade in trades:
-            coins.append(trade["pair"][:len(trade["pair"])-4])
+            coins.append(trade["coin"])
         coins = list(dict.fromkeys(coins))
         coins_str = ",".join(coins)
 
@@ -59,8 +59,11 @@ class TradeList(APIView):
 
         for i in range(len(trades)):
             for j in range(len(data)):
-                if trades[i]["pair"][:len(trades[i]["pair"])-4] == data[j]["id"]:
+                if trades[i]["coin"] == data[j]["id"]:
                     trades[i]["logo"] = data[j]["logo_url"]
+                    print("sdfkjghbedrkjfhgbjkrghkrighkjrhku")
+                    
+        print(json.dumps(trades, indent=4))
 
         return Response(trades, status=status.HTTP_200_OK)
 
@@ -82,7 +85,7 @@ class HoldList(APIView):
         coins = []
         # i don't add the logo in this loop because that would mean a lot of calls to the API, and i can only do once per second
         for hold in holds:
-            coins.append(hold["pair"][:len(hold["pair"])-4])
+            coins.append(hold["coin"])
         coins = list(dict.fromkeys(coins))
         coins_str = ",".join(coins)
 
@@ -97,7 +100,7 @@ class HoldList(APIView):
 
         for i in range(len(holds)):
             for j in range(len(data)):
-                if holds[i]["pair"][:len(holds[i]["pair"])-4] == data[j]["id"]:
+                if holds[i]["coin"] == data[j]["id"]:
                     holds[i]["logo"] = data[j]["logo_url"]
                     holds[i]["price"] = data[j]["price"]
                     holds[i]["market_cap"] = data[j]["market_cap"]
@@ -125,7 +128,7 @@ class TradeOnHoldList(APIView):
         coins = []
         # i don't add the logo in this loop because that would mean a lot of calls to the API, and i can only do once per second
         for trade_on_hold in trades_on_hold:
-            coins.append(trade_on_hold["pair"][:len(trade_on_hold["pair"])-4])
+            coins.append(trade_on_hold["coin"])
         coins = list(dict.fromkeys(coins))
         coins_str = ",".join(coins)
 
@@ -140,7 +143,7 @@ class TradeOnHoldList(APIView):
 
         for i in range(len(trades_on_hold)):
             for j in range(len(data)):
-                if trades_on_hold[i]["pair"][:len(trades_on_hold[i]["pair"])-4] == data[j]["id"]:
+                if trades_on_hold[i]["coin"] == data[j]["id"]:
                     trades_on_hold[i]["logo"] = data[j]["logo_url"]
 
 
@@ -155,12 +158,11 @@ class TrackerList(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request, format=None):
-        print(f"lasss coookies {request.COOKIES.get('refresh')}")
         file = request.stream.FILES["file"]
         result = track_coins(file)
         # for some reason in GET methos user exist, here in POST is anonymous, so i get it with the token
-        access_token = RefreshToken(token=request.COOKIES.get("refresh"), verify=True)
         
+        access_token = RefreshToken(token=request.COOKIES.get("refresh"), verify=True)
         try:
             user = JWTTokenUserAuthentication.get_user(
                 self, validated_token=access_token)
@@ -200,7 +202,7 @@ class TrackerList(APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
-class TrackerDetail(APIView):
+class TradeDetail(APIView):
     """check this"""
     def get_object(self, pk):
         access_token = RefreshToken(token=self.request.COOKIES.get("refresh"), verify=True)
@@ -236,6 +238,29 @@ class TrackerDetail(APIView):
         trade = self.get_object(pk)
         trade.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+class Delete(APIView):
+    def post(self, request, format=None):
+        access_token = RefreshToken(token=request.COOKIES.get("refresh"), verify=True)
+        try:
+            user = JWTTokenUserAuthentication.get_user(
+                self, validated_token=access_token)
+            request.user = User.objects.get(pk=user.id)
+        except ValidationError as v:
+            print("validation error", v)
+            
+        trades = Trade.objects.filter(owner=request.user)
+        holds = Hold.objects.filter(owner=request.user)
+        trades_on_hold = TradeOnHold.objects.filter(owner=request.user)
+        trades.delete()
+        holds.delete()
+        trades_on_hold.delete()
+    
+
+        return Response({"msg": f"you delete all successfully"},status=status.HTTP_204_NO_CONTENT)
+
 
 
 

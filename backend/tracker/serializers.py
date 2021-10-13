@@ -7,7 +7,7 @@ class TradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Trade
         fields = "__all__"
-# ['id', 'pair', 'start', 'end', 'profit_loss', 'percentage']
+# ['id', 'coin', 'start', 'end', 'profit_loss', 'percentage']
 
 class HoldSerializer(serializers.ModelSerializer):
     class Meta:
